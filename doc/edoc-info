@@ -1,3 +1,0 @@
-{application,tcp_rpc}.
-{packages,[]}.
-{modules,[tcp_rpc_app,tcp_rpc_server,tcp_rpc_sup]}.
