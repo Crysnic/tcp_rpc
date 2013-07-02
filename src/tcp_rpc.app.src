@@ -2,11 +2,6 @@
  [
   {description, "RPC server for Erlang and OTP in action"},
   {vsn, "0.1.0"},
-  {registered, [tcp_rpc_sup]},
-  {applications, [
-                  kernel,
-                  stdlib
-                 ]},
-  {mod, { tcp_rpc_app, []}},
-  {env, []}
+  {applications, [kernel, stdlib]},
+  {mod, { tcp_rpc_app, []}}
  ]}.

@@ -15,53 +15,41 @@
 
 %% API
 -export([
-		 start_link/1,
-		 start_link/0,
-		 get_count/0,
-		 stop/0
-		 ]).
+	start_link/1,
+	start_link/0,
+	get_count/0,
+	stop/0
+	]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-		 terminate/2, code_change/3]).
+	terminate/2, code_change/3]).
 
 -define(DEFAULT_PORT, 1055).
 
--record(state, {port, lsock, request_count = 0}).
+-record(state, {port :: inet:port_number(), 
+	lsock :: gen_tcp:socket(),
+	request_count = 0 :: integer()}).
 
-%%%=========================================================================
 %%% API
-%%%=========================================================================
 
-%%--------------------------------------------------------------------------
-%% @doc Starts the srever.
-%%--------------------------------------------------------------------------
--spec start_link(Port::integer()) -> {ok, pid()}.
 start_link(Port) ->
 	gen_server:start_link({local, ?MODULE}, ?MODULE, [Port], []).
 
 %% @doc Calls `start_link(Port)' using the default port.
--spec start_link() -> {ok, pid()}.
 start_link() ->
 	tcp_rpc_server:start_link(?DEFAULT_PORT).
 
-%%--------------------------------------------------------------------------
 %% @doc Fetches the number of requests made to this server.
-%%--------------------------------------------------------------------------
 -spec get_count() -> {ok, Count::integer()}.
 get_count() ->
 	gen_server:call(?MODULE, get_count).
 
-%%--------------------------------------------------------------------------
-%% @doc Stops the server.
-%%--------------------------------------------------------------------------
 -spec stop() -> ok.
 stop() ->
 	gen_server:cast(?MODULE, stop).
 
-%%%=========================================================================
 %%% gen_server callbacks
-%%%=========================================================================
 
 init([Port]) ->
 	{ok, LSock} = gen_tcp:listen(Port, [{active, true}]),
@@ -86,9 +74,7 @@ terminate(_Reason, _State) -> ok.
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
-%%%=========================================================================
 %%% Internal functions
-%%%=========================================================================
 
 do_rpc(Socket, RawData) ->
 	try
@@ -104,8 +90,8 @@ split_out_mfa(RawData) ->
 	MFA = re:replace(RawData, "\r\n$", "", [{return, list}]),
 	{match, [M, F, A]} =
 		re:run(MFA,
-				"(.*):(.*)\s*\\((.*)\s*\\)\s*.\s*$",
-				[{capture, [1,2,3], list}, ungreedy]),
+			"(.*):(.*)\s*\\((.*)\s*\\)\s*.\s*$",
+			[{capture, [1,2,3], list}, ungreedy]),
 	{list_to_atom(M), list_to_atom(F), args_to_terms(A)}.
 
 args_to_terms(RawArgs) ->
